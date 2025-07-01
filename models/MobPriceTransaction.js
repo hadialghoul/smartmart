@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 import Store from './Store.js';
 
-const MobPurshaseTransaction = sequelize.define('MobPurshaseTransaction', {
+const MobPriceTransaction = sequelize.define('MobPriceTransaction', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -20,10 +20,6 @@ const MobPurshaseTransaction = sequelize.define('MobPurshaseTransaction', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-   image: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
   branch_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -33,20 +29,20 @@ const MobPurshaseTransaction = sequelize.define('MobPurshaseTransaction', {
     }
   }
 }, {
-  tableName: 'mob_purshase_transaction',
+  tableName: 'mob_price_transaction',
   timestamps: false, // Disable createdAt and updatedAt
   freezeTableName: true // Use exact table name, don't pluralize
 });
 
 // Define associations
-MobPurshaseTransaction.belongsTo(Store, {
+MobPriceTransaction.belongsTo(Store, {
   foreignKey: 'branch_id',
   as: 'store'
 });
 
-Store.hasMany(MobPurshaseTransaction, {
+Store.hasMany(MobPriceTransaction, {
   foreignKey: 'branch_id',
-  as: 'purshaseTransactions'
+  as: 'priceTransactions'
 });
 
-export default MobPurshaseTransaction;
+export default MobPriceTransaction;
