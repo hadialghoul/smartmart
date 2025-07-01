@@ -1,6 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
-import MobPurshaseTransaction from './mobPurshaseTransaction.js';
+import MobPurshaseTransaction from './MobPurshaseTransaction.js';
 
 const PurshaseData = sequelize.define('PurshaseData', {
   id: {

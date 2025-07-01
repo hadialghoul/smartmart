@@ -3,7 +3,7 @@ import MobPriceTransaction from './MobPriceTransaction.js';
 import Store from './Store.js';
 import PriceData from './PriceData.js';
 import PurshaseData from './PurshaseData.js';
-import MobPurshaseTransaction from './mobPurshaseTransaction.js';
+import MobPurshaseTransaction from './MobPurshaseTransaction.js';
 
 const models = {
   MobPriceTransaction,

@@ -1,4 +1,4 @@
-import MobPurshaseTransaction from '../models/mobPurshaseTransaction.js';
+import MobPurshaseTransaction from '../models/MobPurshaseTransaction.js';
 import Store from '../models/Store.js';
 import PurshaseData from "../models/PurshaseData.js"
 
