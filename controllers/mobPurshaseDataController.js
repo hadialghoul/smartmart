@@ -1,11 +1,15 @@
 import MobPurshaseTransaction from '../models/MobPurshaseTransaction.js';
 import Store from '../models/Store.js';
-import PurshaseData from "../models/PurshaseData.js"
+import PurshaseData from "../models/PurshaseData.js";
 
 // Create PurshaseData
 export const createPurshaseData = async (req, res) => {
   try {
-    const { name, datetime, barcode, quantity, cost, transaction_id } = req.body;
+    const { name, datetime, barcode, quantity, cost, transaction_id,is_mobile } = req.body;
+
+    if(is_mobile === true) {
+      createTransaction(username, date, item_number, branch_id,is_mobile);
+    }
     
     // Validate required fields
     if (!name || !datetime || !quantity || !cost || !transaction_id) {

@@ -5,7 +5,7 @@ import PriceData from '../models/PriceData.js';
 // Create PriceData
 export const createPriceData = async (req, res) => {
   try {
-    const { name, datetime, barcode, quantity, price, transaction_id } = req.body;
+    const { name, datetime, barcode, quantity, price, transaction_id,is_mobile } = req.body;
     
     // Validate required fields
     if (!name || !datetime || !quantity || !price || !transaction_id) {
@@ -14,6 +14,10 @@ export const createPriceData = async (req, res) => {
         message: 'Required fields are missing: name, datetime, quantity, price, transaction_id'
       });
     }
+    if (is_mobile === true) {
+      createTransaction(username, datetime,item_number, branch_id,is_mobile);
+    }
+
 
     // Validate data types
     if (isNaN(quantity) || quantity <= 0) {
