@@ -1,8 +1,8 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
-import MobPurshaseTransaction from './MobPurshaseTransaction.js';
+import MobInventoryTransaction from './MobInventoryTransaction.js';
 
-const PurshaseData = sequelize.define('PurshaseData', {
+const InventoryData = sequelize.define('InventoryData', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -12,55 +12,54 @@ const PurshaseData = sequelize.define('PurshaseData', {
     type: DataTypes.STRING,
     allowNull: false
   },
-  datetime: {
-    type: DataTypes.DATE,
+  status: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  system_qty: {
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   barcode: {
     type: DataTypes.STRING,
     allowNull: true
   },
-  quantity: {
+  counted_qty: {
     type: DataTypes.INTEGER,
     allowNull: false,
     defaultValue: 0
   },
-  cost: {
-    type: DataTypes.DECIMAL(10, 2),
+  difference: {
+    type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: 0.00
+    defaultValue: 0
+   
+
   },
+  
   transaction_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: MobPurshaseTransaction,
-      key: 'id'
-    }
-  },
-  user_id: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    references: {
-      model: 'users',
+      model: MobInventoryTransaction,
       key: 'id'
     }
   }
 }, {
-  tableName: 'mob_purshase_data',
-  timestamps: false,
-  freezeTableName: true
+  tableName: 'mob_inventory_data',
+  timestamps: false, // Disable createdAt and updatedAt
+  freezeTableName: true // Use exact table name, don't pluralize
 });
 
 // Define associations
-PurshaseData.belongsTo(MobPurshaseTransaction, {
+InventoryData.belongsTo(MobInventoryTransaction, {
   foreignKey: 'transaction_id',
   as: 'transaction'
 });
 
-MobPurshaseTransaction.hasMany(PurshaseData, {
+MobInventoryTransaction.hasMany(InventoryData, {
   foreignKey: 'transaction_id',
-  as: 'purshaseData' 
+  as: 'inventoryData'
 });
 
-export default PurshaseData;
+export default InventoryData;

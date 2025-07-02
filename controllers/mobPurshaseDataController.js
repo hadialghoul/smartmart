@@ -1,14 +1,29 @@
 import MobPurshaseTransaction from '../models/MobPurshaseTransaction.js';
 import Store from '../models/Store.js';
 import PurshaseData from "../models/PurshaseData.js";
+import User from '../models/User.js';
 
 // Create PurshaseData
 export const createPurshaseData = async (req, res) => {
   try {
-    const { name, datetime, barcode, quantity, cost, transaction_id,is_mobile } = req.body;
-
-    if(is_mobile === true) {
-      createTransaction(username, date, item_number, branch_id,is_mobile);
+    const { name, datetime, barcode, quantity, cost, transaction_id, is_mobile, token, item_number, branch_id } = req.body;
+    let user = null;
+    if (is_mobile === true) {
+      if (!token) {
+        return res.status(400).json({
+          success: false,
+          message: 'Token is required for mobile requests'
+        });
+      }
+      user = await User.findOne({ where: { token } });
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid token: user not found'
+        });
+      }
+      // You can now use user.id or other user info as needed
+      // createTransaction(user.username, datetime, item_number, branch_id, is_mobile);
     }
     
     // Validate required fields
@@ -124,11 +139,24 @@ export const getAllPurshaseData = async (req, res) => {
 export const getPurshaseDataById = async (req, res) => {
   try {
     const { id } = req.params;
-
+    const { token } = req.body;
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid ID is required'
+      });
+    }
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token is required'
+      });
+    }
+    const user = await User.findOne({ where: { token } });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token: user not found'
       });
     }
 
@@ -172,12 +200,24 @@ export const getPurshaseDataById = async (req, res) => {
 export const updatePurshaseData = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, datetime, barcode, quantity, cost, transaction_id } = req.body;
-
+    const { name, datetime, barcode, quantity, cost, transaction_id, token } = req.body;
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid ID is required'
+      });
+    }
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token is required'
+      });
+    }
+    const user = await User.findOne({ where: { token } });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token: user not found'
       });
     }
 
@@ -262,11 +302,24 @@ export const updatePurshaseData = async (req, res) => {
 export const deletePurshaseData = async (req, res) => {
   try {
     const { id } = req.params;
-
+    const { token } = req.body;
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid ID is required'
+      });
+    }
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token is required'
+      });
+    }
+    const user = await User.findOne({ where: { token } });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token: user not found'
       });
     }
 

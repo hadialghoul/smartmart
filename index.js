@@ -5,6 +5,8 @@ import cors from "cors"
 import sequelize  from "./config/database.js"
 import mobPriceTransactionRoutes from "./routes/mobPriceTransactionRoutes.js"
 import mobPriceDataRoute from "./routes/mobPriceDataRoute.js"
+import mobInventoryTransactionRoute from "./routes/mobInventoryTransaction.js"
+import mobInventoryDataRoute from "./routes/mobInventoryDataRoute.js"
 
 import mobPurshaseTransactionRoute from "./routes/mobPurshaseTransactionRoute.js"
 import mobPurshaseRoute from './routes/mobPurshaseDataRoute.js'
@@ -27,8 +29,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve s
 app.use('/api/price-data',mobPriceDataRoute)
 app.use('/api/transactions', mobPriceTransactionRoutes);
 
+
 app.use('/api/purshase-data',mobPurshaseRoute)
 app.use('/api/transactions-purshase',mobPurshaseTransactionRoute)
+
+app.use('/api/inventory-transactions', mobInventoryTransactionRoute);
+app.use('/api/inventory-data',mobInventoryDataRoute)
 
 
 // Health check route

@@ -39,7 +39,15 @@ const PriceData = sequelize.define('PriceData', {
       model: MobPriceTransaction,
       key: 'id'
     }
-  }
+  },
+  user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
+  },
 }, {
   tableName: 'mob_price_data',
   timestamps: false, // Disable createdAt and updatedAt

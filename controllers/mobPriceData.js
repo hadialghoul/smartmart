@@ -1,11 +1,12 @@
 import MobPriceTransaction from '../models/MobPriceTransaction.js';
 import Store from '../models/Store.js';
 import PriceData from '../models/PriceData.js';
+import User from '../models/User.js';
 
 // Create PriceData
 export const createPriceData = async (req, res) => {
   try {
-    const { name, datetime, barcode, quantity, price, transaction_id,is_mobile } = req.body;
+    const { name, datetime, barcode, quantity, price, transaction_id, is_mobile, item_number, branch_id, token } = req.body;
     
     // Validate required fields
     if (!name || !datetime || !quantity || !price || !transaction_id) {
@@ -14,8 +15,23 @@ export const createPriceData = async (req, res) => {
         message: 'Required fields are missing: name, datetime, quantity, price, transaction_id'
       });
     }
+    let user = null;
     if (is_mobile === true) {
-      createTransaction(username, datetime,item_number, branch_id,is_mobile);
+      if (!token) {
+        return res.status(400).json({
+          success: false,
+          message: 'Token is required for mobile requests'
+        });
+      }
+      user = await User.findOne({ where: { token } });
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid token: user not found'
+        });
+      }
+      // You can now use user.id or other user info as needed
+      // createTransaction(user.username, datetime, item_number, branch_id, is_mobile);
     }
 
 
@@ -124,14 +140,26 @@ console.log('PriceData:', priceData.rows);
 export const getPriceDataById = async (req, res) => {
   try {
     const { id } = req.params;
-
+    const { token } = req.body;
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid ID is required'
       });
     }
-
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token is required'
+      });
+    }
+    const user = await User.findOne({ where: { token } });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token: user not found'
+      });
+    }
     const priceData = await PriceData.findByPk(id, {
       include: [
         {
@@ -146,14 +174,12 @@ export const getPriceDataById = async (req, res) => {
         }
       ]
     });
-
     if (!priceData) {
       return res.status(404).json({
         success: false,
         message: 'PriceData not found'
       });
     }
-
     res.status(200).json({
       success: true,
       message: 'PriceData retrieved successfully',
@@ -172,12 +198,24 @@ export const getPriceDataById = async (req, res) => {
 export const updatePriceData = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, datetime, barcode, quantity, price, transaction_id } = req.body;
-
+    const { name, datetime, barcode, quantity, price, transaction_id, token } = req.body;
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid ID is required'
+      });
+    }
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token is required'
+      });
+    }
+    const user = await User.findOne({ where: { token } });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token: user not found'
       });
     }
 
@@ -262,11 +300,24 @@ export const updatePriceData = async (req, res) => {
 export const deletePriceData = async (req, res) => {
   try {
     const { id } = req.params;
-
+    const { token } = req.body;
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid ID is required'
+      });
+    }
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token is required'
+      });
+    }
+    const user = await User.findOne({ where: { token } });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token: user not found'
       });
     }
 
