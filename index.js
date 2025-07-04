@@ -49,8 +49,8 @@ const startServer = async () => {
     console.log('Database connected successfully');
     
     // DON'T sync models since tables already exist
-    // await sequelize.sync({ alter: false }); // COMMENTED OUT - tables already exist
-    await sequelize.sync({ alter: false }); // TEMP: create missing tables if not present
+     await sequelize.sync({ alter: false }); // COMMENTED OUT - tables already exist
+ 
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
 import Store from './Store.js';
+import User from './User.js';
 
 const MobPriceTransaction = sequelize.define('MobPriceTransaction', {
   id: {
@@ -8,9 +9,13 @@ const MobPriceTransaction = sequelize.define('MobPriceTransaction', {
     primaryKey: true,
     autoIncrement: true
   },
-  username: {
-    type: DataTypes.STRING,
-    allowNull: false
+  user_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: User,
+      key: 'id'
+    }
   },
   date: {
     type: DataTypes.DATEONLY,
@@ -27,6 +32,30 @@ const MobPriceTransaction = sequelize.define('MobPriceTransaction', {
       model: Store,
       key: 'id'
     }
+  },
+  created_by: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: User,
+      key: 'id'
+    }
+  },
+  updated_by: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: User,
+      key: 'id'
+    }
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'mob_price_transaction',

@@ -8,7 +8,8 @@ const User = sequelize.define('User', {
     primaryKey: true,
     autoIncrement: true
   },
-  username: {
+
+  user_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
@@ -28,7 +29,7 @@ const User = sequelize.define('User', {
     type: DataTypes.ENUM('male', 'female', 'other'),
     allowNull: true
   },
-  disable: {
+  disabled: {
     type: DataTypes.TINYINT,
     allowNull: false,
     defaultValue: 0

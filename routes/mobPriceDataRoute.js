@@ -6,6 +6,7 @@ import {
   getPriceDataById,
   updatePriceData,
   deletePriceData,
+  getPriceDataByTransactionId // add this import
 } from "../controllers/mobPriceData.js";
 
 // POST /api/transactions - Create new transaction
@@ -22,5 +23,8 @@ router.put('/:id', updatePriceData);
 
 // DELETE /api/transactions/:id - Delete transaction by ID
 router.delete('/:id', deletePriceData);
+
+// GET /api/price-data/transaction/:transaction_id - Get all products in PriceData for a transaction
+router.get('/transaction/:transaction_id', getPriceDataByTransactionId);
 
 export default router;

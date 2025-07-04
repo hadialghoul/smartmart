@@ -1,6 +1,9 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/database.js';
+import MobPriceList from './MobPriceList.js';
+import Product from './Products.js';
 import MobPriceTransaction from './MobPriceTransaction.js';
+
 
 const PriceData = sequelize.define('PriceData', {
   id: {
@@ -8,61 +11,55 @@ const PriceData = sequelize.define('PriceData', {
     primaryKey: true,
     autoIncrement: true
   },
-  name: {
-    type: DataTypes.STRING,
+  
+  item_number: {
+    type: DataTypes.INTEGER,
     allowNull: false
   },
-  datetime: {
-    type: DataTypes.DATE,
-    allowNull: false
+  product_id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Product,
+      key: 'id'
+    }
   },
-  barcode: {
-    type: DataTypes.STRING,
-    allowNull: true
+  price:{
+    type: DataTypes.FLOAT,
+    allowNull: false
   },
   quantity: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0
+    allowNull: false
   },
-  price: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: false,
-    defaultValue: 0.00
-   
-
+  expiery: {
+    type: DataTypes.DATE,
+    allowNull: true
   },
   transaction_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: MobPriceTransaction,
-      key: 'id'
-    }
-  },
-  user_id: {
-    type: DataTypes.INTEGER,
     allowNull: true,
+    defaultValue:1,
     references: {
-      model: 'users',
+      model: 'mob_price_transaction',
       key: 'id'
     }
-  },
+  }
 }, {
   tableName: 'mob_price_data',
-  timestamps: false, // Disable createdAt and updatedAt
-  freezeTableName: true // Use exact table name, don't pluralize
+  timestamps: false,
+  freezeTableName: true
 });
 
-// Define associations
+// Define associations for PriceData
 PriceData.belongsTo(MobPriceTransaction, {
   foreignKey: 'transaction_id',
   as: 'transaction'
 });
 
-MobPriceTransaction.hasMany(PriceData, {
-  foreignKey: 'transaction_id',
-  as: 'priceData'
+PriceData.belongsTo(Product, {
+  foreignKey: 'product_id',
+  as: 'product'
 });
 
 export default PriceData;
