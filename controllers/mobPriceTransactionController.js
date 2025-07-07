@@ -6,20 +6,13 @@ import PriceData from '../models/PriceData.js';
 // CREATE - Add new transaction
 export const createTransaction = async (req, res) => {
   try {
-    const { username, user_id, date, item_number, branch_id, token } = req.body;
+    const { user_name, user_id, date, item_number, branch_id, token } = req.body;
     const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
 
     let finalUserId = user_id;
-    
-    // Handle mobile authentication
-    if (is_mobile) {
-      if (!token) {
-        return res.status(400).json({
-          success: false,
-          message: 'Token is required for mobile requests'
-        });
-      }
-      
+
+    // If token is provided (web or mobile), use it to find the user
+    if (token) {
       const user = await User.findOne({ where: { token } });
       if (!user) {
         return res.status(401).json({
@@ -38,11 +31,11 @@ export const createTransaction = async (req, res) => {
       });
     }
 
-    // For web version, require username or user_id
-    if (!is_mobile && !username && !user_id) {
+    // For web version, require user_name or user_id if no token
+    if (!is_mobile && !token && !user_name && !user_id) {
       return res.status(400).json({
         success: false,
-        message: 'Either username or user_id is required for web requests'
+        message: 'Either token, user_name or user_id is required for web requests'
       });
     }
 
@@ -55,13 +48,13 @@ export const createTransaction = async (req, res) => {
       });
     }
 
-    // If username is provided but no user_id, find the user
-    if (username && !finalUserId) {
-      const user = await User.findOne({ where: { username } });
+    // If user_name is provided but no user_id and no token, find the user
+    if (user_name && !finalUserId) {
+      const user = await User.findOne({ where: { user_name } });
       if (!user) {
         return res.status(404).json({
           success: false,
-          message: 'User not found with the provided username'
+          message: 'User not found with the provided user_name'
         });
       }
       finalUserId = user.id;
@@ -131,7 +124,7 @@ export const getAllTransactions = async (req, res) => {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'username', 'email'],
+          attributes: ['id', 'user_name', 'email_address'],
           foreignKey: 'user_id'
         }
       ],
@@ -204,7 +197,7 @@ export const getTransactionById = async (req, res) => {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'username', 'email'],
+          attributes: ['id', 'user_name', 'email_address'],
           foreignKey: 'user_id'
         }
       ]
@@ -235,7 +228,7 @@ export const getTransactionById = async (req, res) => {
 export const updateTransaction = async (req, res) => {
   try {
     const { id } = req.params;
-    const { username, user_id, date, item_number, branch_id, token } = req.body;
+    const { user_name, user_id, date, item_number, branch_id, token } = req.body;
     const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
 
     if (!id || isNaN(id)) {
@@ -294,14 +287,14 @@ export const updateTransaction = async (req, res) => {
       }
     }
 
-    // Handle user_id update if username is provided
+    // Handle user_id update if user_name is provided
     let finalUserId = user_id || transaction.user_id;
-    if (username && !user_id) {
-      const user = await User.findOne({ where: { username } });
+    if (user_name && !user_id) {
+      const user = await User.findOne({ where: { user_name } });
       if (!user) {
         return res.status(404).json({
           success: false,
-          message: 'User not found with the provided username'
+          message: 'User not found with the provided user_name'
         });
       }
       finalUserId = user.id;
@@ -329,7 +322,7 @@ export const updateTransaction = async (req, res) => {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'username', 'email'],
+          attributes: ['id', 'user_name', 'email_address'],
           foreignKey: 'user_id'
         }
       ]

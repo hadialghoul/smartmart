@@ -69,8 +69,14 @@ MobPriceTransaction.belongsTo(Store, {
   as: 'store'
 });
 
-Store.hasMany(MobPriceTransaction, {
-  foreignKey: 'branch_id',
+// Add user association
+MobPriceTransaction.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
+});
+
+User.hasMany(MobPriceTransaction, {
+  foreignKey: 'user_id',
   as: 'priceTransactions'
 });
 
