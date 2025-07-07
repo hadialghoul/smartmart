@@ -248,20 +248,8 @@ export const createPriceData = async (req, res) => {
 // Get all PriceData
 export const getAllPriceData = async (req, res) => {
   try {
-    const { page = 1, limit = 10, transaction_id, token } = req.query;
-    const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
+    const { page = 1, limit = 10, transaction_id } = req.query;
     const offset = (page - 1) * limit;
-
-    // Mobile authentication
-    if (is_mobile && token) {
-      const user = await User.findOne({ where: { token } });
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid token: user not found'
-        });
-      }
-    }
 
     // Build where clause
     const whereClause = {};
@@ -318,32 +306,12 @@ export const getAllPriceData = async (req, res) => {
 export const getPriceDataById = async (req, res) => {
   try {
     const { id } = req.params;
-    // Accept token from either body (POST) or query (GET)
-    const token = req.body?.token || req.query?.token;
-    const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
 
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid ID is required'
       });
-    }
-
-    // Mobile authentication
-    if (is_mobile) {
-      if (!token) {
-        return res.status(400).json({
-          success: false,
-          message: 'Token is required for mobile requests'
-        });
-      }
-      const user = await User.findOne({ where: { token } });
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid token: user not found'
-        });
-      }
     }
 
     const priceData = await PriceData.findByPk(id, {
@@ -390,12 +358,34 @@ export const getPriceDataById = async (req, res) => {
 export const getPriceDataByTransactionId = async (req, res) => {
   try {
     const { transaction_id } = req.params;
+    // Accept token from query, body, or headers
+    const token = req.query?.token || req.body?.token || req.headers['authorization'];
+    const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
+
     if (!transaction_id || isNaN(transaction_id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid transaction_id is required'
       });
     }
+
+    // Mobile authentication
+    if (is_mobile) {
+      if (!token) {
+        return res.status(400).json({
+          success: false,
+          message: 'Token is required for mobile requests'
+        });
+      }
+      const user = await User.findOne({ where: { token } });
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid token: user not found'
+        });
+      }
+    }
+
     const priceData = await PriceData.findAll({
       where: { transaction_id },
       include: [
@@ -430,7 +420,9 @@ export const getPriceDataByTransactionId = async (req, res) => {
 export const updatePriceData = async (req, res) => {
   try {
     const { id } = req.params;
-    const { item_number, product_id, price, quantity, expiary, transaction_id, token, barcode } = req.body;
+    // Accept token from body, query, or headers
+    const token = req.body?.token || req.query?.token || req.headers['authorization'];
+    const { item_number, product_id, price, quantity, expiary, transaction_id, barcode } = req.body;
     const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
 
     if (!id || isNaN(id)) {
@@ -554,31 +546,12 @@ export const updatePriceData = async (req, res) => {
 export const deletePriceData = async (req, res) => {
   try {
     const { id } = req.params;
-    const { token } = req.body;
-    const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
 
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid ID is required'
       });
-    }
-
-    // Mobile authentication
-    if (is_mobile) {
-      if (!token) {
-        return res.status(400).json({
-          success: false,
-        message: 'Token is required for mobile requests'
-      });
-      }
-      const user = await User.findOne({ where: { token } });
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid token: user not found'
-        });
-      }
     }
 
     // Check if PriceData exists
