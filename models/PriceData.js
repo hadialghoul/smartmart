@@ -44,6 +44,10 @@ const PriceData = sequelize.define('PriceData', {
       model: 'mob_price_transaction',
       key: 'id'
     }
+  },
+  barcode: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, {
   tableName: 'mob_price_data',

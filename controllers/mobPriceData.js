@@ -106,6 +106,14 @@ export const createPriceData = async (req, res) => {
             message: `Price for product ${p.product_id} must be a non-negative number`
           });
         }
+        // Check if product exists before creating PriceData
+        const productExists = await Product.findByPk(p.product_id);
+        if (!productExists) {
+          return res.status(404).json({
+            success: false,
+            message: `Product not found with the provided product_id: ${p.product_id}`
+          });
+        }
         const priceData = await PriceData.create({
           item_number: p.item_number,
           product_id: p.product_id,
@@ -113,7 +121,8 @@ export const createPriceData = async (req, res) => {
           quantity: parseInt(p.quantity),
           expiary: p.expiary || null,
           branch_id: branch_id,
-          transaction_id: transactionId
+          transaction_id: transactionId,
+          barcode: p.barcode || null
         });
         createdProducts.push(priceData);
       }
@@ -215,7 +224,8 @@ export const createPriceData = async (req, res) => {
       price: parseFloat(price),
       quantity: parseInt(quantity),
       expiary: expiary || null,
-      transaction_id: finalTransactionId
+      transaction_id: finalTransactionId,
+      barcode: barcode || null
     };
 
     const priceData = await PriceData.create(priceDataObj);
@@ -420,7 +430,7 @@ export const getPriceDataByTransactionId = async (req, res) => {
 export const updatePriceData = async (req, res) => {
   try {
     const { id } = req.params;
-    const { item_number, product_id, price, quantity, expiary, transaction_id, token } = req.body;
+    const { item_number, product_id, price, quantity, expiary, transaction_id, token, barcode } = req.body;
     const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
 
     if (!id || isNaN(id)) {
@@ -501,6 +511,7 @@ export const updatePriceData = async (req, res) => {
     if (quantity !== undefined) updateData.quantity = parseInt(quantity);
     if (expiary !== undefined) updateData.expiary = expiary;
     if (transaction_id !== undefined) updateData.transaction_id = transaction_id;
+    if (barcode !== undefined) updateData.barcode = barcode;
 
     // Update PriceData
     await existingPriceData.update(updateData);
