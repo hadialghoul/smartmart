@@ -87,29 +87,13 @@ export const createTransaction = async (req, res) => {
 // READ - Get all transactions
 export const getAllTransactions = async (req, res) => {
   try {
-    const { page = 1, limit = 10, user_id, token } = req.query;
-    const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
+    const { page = 1, limit = 10, user_id } = req.query;
     const offset = (page - 1) * limit;
 
     let whereClause = {};
-    let authenticatedUserId = null;
 
-    // Handle mobile authentication
-    if (is_mobile && token) {
-      const user = await User.findOne({ where: { token } });
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid token: user not found'
-        });
-      }
-      authenticatedUserId = user.id;
-      // For mobile, only show transactions for the authenticated user
-      whereClause.user_id = authenticatedUserId;
-    }
-
-    // Add user_id filter if provided (for web version)
-    if (!is_mobile && user_id) {
+    // Add user_id filter if provided
+    if (user_id) {
       whereClause.user_id = user_id;
     }
 
@@ -159,32 +143,12 @@ export const getAllTransactions = async (req, res) => {
 export const getTransactionById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { token } = req.body;
-    const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
 
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid ID is required'
       });
-    }
-
-    // Handle mobile authentication
-    if (is_mobile) {
-      if (!token) {
-        return res.status(400).json({
-          success: false,
-          message: 'Token is required for mobile requests'
-        });
-      }
-      
-      const user = await User.findOne({ where: { token } });
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid token: user not found'
-        });
-      }
     }
     
     const transaction = await MobPriceTransaction.findByPk(id, {
@@ -346,35 +310,12 @@ export const updateTransaction = async (req, res) => {
 export const deleteTransaction = async (req, res) => {
   try {
     const { id } = req.params;
-    const { token } = req.body;
-    const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
 
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid ID is required'
       });
-    }
-
-    let authenticatedUserId = null;
-
-    // Handle mobile authentication
-    if (is_mobile) {
-      if (!token) {
-        return res.status(400).json({
-          success: false,
-          message: 'Token is required for mobile requests'
-        });
-      }
-      
-      const user = await User.findOne({ where: { token } });
-      if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid token: user not found'
-        });
-      }
-      authenticatedUserId = user.id;
     }
     
     const transaction = await MobPriceTransaction.findByPk(id);
@@ -383,14 +324,6 @@ export const deleteTransaction = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Transaction not found'
-      });
-    }
-
-    // For mobile, ensure user can only delete their own transactions
-    if (is_mobile && transaction.user_id !== authenticatedUserId) {
-      return res.status(403).json({
-        success: false,
-        message: 'You can only delete your own transactions'
       });
     }
 
@@ -420,5 +353,3 @@ export const deleteTransaction = async (req, res) => {
     });
   }
 };
-
-
