@@ -134,15 +134,15 @@ export const createPriceData = async (req, res) => {
       });
     }
 
-    // Validate required fields for web version
-    if (!is_mobile && !product && (!name || !datetime || !quantity || !price || !transaction_id)) {
+    // WEB VERSION - Validate required fields (transaction_id is required)
+    if (!is_mobile && !product && (!quantity || !price || !transaction_id || !product_id)) {
       return res.status(400).json({
         success: false,
-        message: 'Required fields are missing: name, datetime, quantity, price, transaction_id'
+        message: 'Required fields are missing: quantity, price, transaction_id, product_id'
       });
     }
 
-    // Validate required fields for mobile version
+    // Validate required fields for mobile version (single product)
     if (is_mobile && (!token || !quantity || !price || !item_number || !branch_id || !product_id)) {
       return res.status(400).json({
         success: false,
@@ -206,7 +206,7 @@ export const createPriceData = async (req, res) => {
       });
     }
 
-    // For web version, check if transaction exists
+    // For web version, check if transaction exists (REQUIRED)
     if (!is_mobile) {
       const transaction = await MobPriceTransaction.findByPk(transaction_id);
       if (!transaction) {
@@ -215,12 +215,21 @@ export const createPriceData = async (req, res) => {
           message: 'Transaction not found with the provided transaction_id'
         });
       }
+      
+      // Check if product exists for web version
+      const productExists = await Product.findByPk(product_id);
+      if (!productExists) {
+        return res.status(404).json({
+          success: false,
+          message: 'Product not found with the provided product_id'
+        });
+      }
     }
 
     // Create single PriceData record
     const priceDataObj = {
       item_number: item_number || 1,
-      product_id: product_id || 1,
+      product_id: product_id,
       price: parseFloat(price),
       quantity: parseInt(quantity),
       expiary: expiary || null,
@@ -249,7 +258,27 @@ export const createPriceData = async (req, res) => {
 export const getAllPriceData = async (req, res) => {
   try {
     const { page = 1, limit = 10, transaction_id } = req.query;
+    // Accept token from query, body, or headers
+    const token = req.query?.token || req.body?.token || req.headers['authorization'];
+    const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
     const offset = (page - 1) * limit;
+
+    // Mobile authentication
+    if (is_mobile) {
+      if (!token) {
+        return res.status(400).json({
+          success: false,
+          message: 'Token is required for mobile requests'
+        });
+      }
+      const user = await User.findOne({ where: { token } });
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid token: user not found'
+        });
+      }
+    }
 
     // Build where clause
     const whereClause = {};
@@ -306,12 +335,32 @@ export const getAllPriceData = async (req, res) => {
 export const getPriceDataById = async (req, res) => {
   try {
     const { id } = req.params;
+    // Accept token from body, query, or headers
+    const token = req.body?.token || req.query?.token || req.headers['authorization'];
+    const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
 
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid ID is required'
       });
+    }
+
+    // Mobile authentication
+    if (is_mobile) {
+      if (!token) {
+        return res.status(400).json({
+          success: false,
+          message: 'Token is required for mobile requests'
+        });
+      }
+      const user = await User.findOne({ where: { token } });
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid token: user not found'
+        });
+      }
     }
 
     const priceData = await PriceData.findByPk(id, {
@@ -546,12 +595,32 @@ export const updatePriceData = async (req, res) => {
 export const deletePriceData = async (req, res) => {
   try {
     const { id } = req.params;
+    // Accept token from body, query, or headers
+    const token = req.body?.token || req.query?.token || req.headers['authorization'];
+    const is_mobile = req.get("User-Agent")?.includes("Mozilla") ? false : true;
 
     if (!id || isNaN(id)) {
       return res.status(400).json({
         success: false,
         message: 'Valid ID is required'
       });
+    }
+
+    // Mobile authentication
+    if (is_mobile) {
+      if (!token) {
+        return res.status(400).json({
+          success: false,
+          message: 'Token is required for mobile requests'
+        });
+      }
+      const user = await User.findOne({ where: { token } });
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid token: user not found'
+        });
+      }
     }
 
     // Check if PriceData exists
